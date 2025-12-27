@@ -6,11 +6,11 @@ This repository contains the code and experiments developed as part of a mathema
 
 We implement and compare different Gaussian Process approximations:
 
-- **Full GP (exact)** [Rasmussen & Williams, 2006]
-- **Sparse GP** with Titsias' variational formulation [Titsias, 2009]
-- **Stochastic Variational GP (SVGP)** [Hensman et al., 2013]
-- **Deep Kernel Learning (DKL)** [Wilson et al., 2016] using CNN encoders
-- **Stochastic Variational Deep Kernel Learning (SVDKL)** [Wilson et al., 2016] combining CNNs and SVGP
+- **Full GP (exact)** — Rasmussen & Williams (2006)
+- **Sparse GP** with Titsias' variational formulation — Titsias (2009)
+- **Stochastic Variational GP (SVGP)** — Hensman et al. (2013)
+- **Deep Kernel Learning (DKL)** — Wilson et al. (2016), using CNN encoders
+- **Stochastic Variational Deep Kernel Learning (SVDKL)** — Wilson et al. (2016), combining CNNs and SVGP
 
 All models are implemented in PyTorch.
 
@@ -18,87 +18,99 @@ All models are implemented in PyTorch.
 
 ### Gaussian Process Regression
 
-Given input data \( X \in \mathbb{R}^{n \times d} \) and targets \( y \in \mathbb{R}^n \), a GP prior is defined by:
+Given input data $X \in \mathbb{R}^{n \times d}$ and targets $y \in \mathbb{R}^n$, a Gaussian Process prior is defined as
 
-\[
+$$
 f(x) \sim \mathcal{GP}(0, k(x, x'))
-\]
+$$
 
-The posterior predictive distribution at a new point \( x_* \) is:
+The posterior predictive distribution at a new point $x_{\*}$ is
 
-\[
-\begin{aligned}
-\mu_* &= k(x_*, X) [K(X, X) + \sigma^2 I]^{-1} y \\
-\sigma_*^2 &= k(x_*, x_*) - k(x_*, X) [K + \sigma^2 I]^{-1} k(X, x_*)
-\end{aligned}
-\]
+$$
+\mu_{\*} = k(x_{\*}, X)\,(K(X, X) + \sigma^2 I)^{-1} y
+$$
+
+$$
+\sigma_{\*}^{2} = k(x_{\*}, x_{\*}) - k(x_{\*}, X)\,(K(X, X) + \sigma^2 I)^{-1} k(X, x_{\*})
+$$
 
 ### Sparse GP (Titsias, 2009)
 
-Let \( Z \in \mathbb{R}^{m \times d} \) be the inducing points. Define:
+Let the inducing points be $Z \in \mathbb{R}^{m \times d}$.
 
-- \( K_{mm} = k(Z, Z) \)
-- \( K_{nm} = k(X, Z) \)
-- \( Q_{nn} = K_{nm} K_{mm}^{-1} K_{mn} \)
+Define:
 
-The ELBO is:
+- $K_{mm} = k(Z, Z)$
+- $K_{nm} = k(X, Z)$
+- $Q_{nn} = K_{nm} K_{mm}^{-1} K_{mn}$
 
-\[
-\text{ELBO} = \log \mathcal{N}(y \mid 0, Q_{nn} + \sigma^2 I) - \frac{1}{2\sigma^2} \mathrm{Tr}(K_{nn} - Q_{nn})
-\]
+The evidence lower bound (ELBO) is
+
+$$
+\mathrm{ELBO} =v\log \mathcal{N}(y \mid 0, Q_{nn} + \sigma^2 I) - \frac{1}{2\sigma^2} \mathrm{Tr}(K_{nn} - Q_{nn})
+$$
 
 ### Stochastic Variational GP (Hensman et al., 2013)
 
-We optimize a variational distribution over the inducing outputs \( q(f_m) = \mathcal{N}(m, S) \), with \( S = L L^\top \). The mini-batch ELBO becomes:
+We optimize a variational distribution over inducing outputs
 
-\[
-\text{ELBO} = \sum_{i \in \text{batch}} \mathbb{E}_{q(f_i)} [ \log p(y_i | f_i) ] - \mathrm{KL}[q(f_m) || p(f_m)]
-\]
+$$
+q(f_m) = \mathcal{N}(m, S), \quad S = L L^\top
+$$
+
+Using mini-batches, the ELBO becomes
+
+$$
+\mathrm{ELBO} = \sum_{i \in \text{batch}} \mathbb{E}_{q(f_i)}[\log p(y_i \mid f_i)] - \mathrm{KL}[q(f_m) \| p(f_m)]
+$$
 
 ### Deep Kernel Learning (Wilson et al., 2016)
 
-We define a deep kernel by learning a nonlinear feature map \( \phi(x) \) via a CNN:
+A deep kernel is defined by learning a nonlinear feature map $\phi(x)$ using a CNN:
 
-\[
+$$
 k_{\text{deep}}(x, x') = k(\phi(x), \phi(x'))
-\]
+$$
 
-This is combined with a sparse GP or SVGP for scalability.
+This kernel is combined with a sparse GP or SVGP to ensure scalability.
 
 ## Files
 
 ```
+
 .
-├── create_data.py             # Augments and saves the Olivetti dataset
-├── dataset.py                 # Loads and splits the dataset
-├── visualisation.py           # Displays prediction results with uncertainty
+├── create_data.py
+├── dataset.py
+├── visualisation.py
 ├── models/
-│   ├── GP.py                  # Full GP
-│   ├── SGP.py                 # Sparse GP (Titsias)
-│   ├── SVGP.py                # Stochastic Variational GP (Hensman)
-│   ├── NN.py                  # CNN encoders
-│   ├── DKL.py                 # DKL with SGP
-│   ├── SVDKL.py               # SVDKL with SVGP
-├── dkl_olivetti.py            # Train + test DKL model
-├── svdkl_olivetti.py          # Train + test SVDKL model
-├── sgp_olivetti.py            # Train + test SGP model
-├── svgp_olivetti.py           # Train + test SVGP model
-├── gp_olivetti.py             # Train + test full GP
-```
+│   ├── GP.py
+│   ├── SGP.py
+│   ├── SVGP.py
+│   ├── NN.py
+│   ├── DKL.py
+│   ├── SVDKL.py
+├── dkl_olivetti.py
+├── svdkl_olivetti.py
+├── sgp_olivetti.py
+├── svgp_olivetti.py
+├── gp_olivetti.py
+
+````
 
 ## Dataset: Olivetti Faces
 
-We use `fetch_olivetti_faces()` from `sklearn.datasets` and augment the images with random rotations. The task is to regress the applied rotation angle from the raw pixel data.
+We use `fetch_olivetti_faces()` from `sklearn.datasets` and augment the images with random rotations.  
+The task is to regress the applied rotation angle from raw pixel intensities.
 
 ## Installation
 
 ```bash
 pip install -r requirement.txt
-```
+````
 
-## Citation and References
+## References
 
-- Titsias, M. K. (2009). Variational Learning of Inducing Variables in Sparse Gaussian Processes.
-- Hensman, J., Fusi, N., & Lawrence, N. D. (2013). Gaussian Processes for Big Data.
-- Wilson, A. G., Hu, Z., Salakhutdinov, R., & Xing, E. P. (2016). Deep Kernel Learning.
-- Rasmussen, C. E., & Williams, C. K. I. (2006). Gaussian Processes for Machine Learning.
+* Titsias, M. K. (2009). *Variational Learning of Inducing Variables in Sparse Gaussian Processes*
+* Hensman, J., Fusi, N., & Lawrence, N. D. (2013). *Gaussian Processes for Big Data*
+* Wilson, A. G., Hu, Z., Salakhutdinov, R., & Xing, E. P. (2016). *Deep Kernel Learning*
+* Rasmussen, C. E., & Williams, C. K. I. (2006). *Gaussian Processes for Machine Learning*
