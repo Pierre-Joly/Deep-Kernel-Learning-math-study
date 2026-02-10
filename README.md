@@ -2,6 +2,11 @@
 
 This repository contains the code and experiments developed as part of a mathematics specialization project focused on approximate Bayesian inference with Gaussian Processes (GPs) and Deep Kernel Learning (DKL). The models are applied to the Olivetti Faces dataset with the goal of predicting the rotation angle of facial images from pixel intensities, while capturing predictive uncertainty.
 
+## Reports
+
+- French report: `reports/report_fr.pdf`
+- English translation: `reports/report_en.pdf`
+
 ## Overview
 
 We implement and compare different Gaussian Process approximations:
@@ -84,6 +89,8 @@ This is combined with a sparse GP or SVGP for scalability.
 ├── sgp_olivetti.py            # Train + test SGP model
 ├── svgp_olivetti.py           # Train + test SVGP model
 ├── gp_olivetti.py             # Train + test full GP
+├── reports/
+│   ├── report_fr.pdf          # French report
 ```
 
 ## Dataset: Olivetti Faces
